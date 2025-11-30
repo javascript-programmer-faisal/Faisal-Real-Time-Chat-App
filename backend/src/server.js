@@ -11,29 +11,35 @@ import chatRoutes from "./routes/chat.route.js";
 import { connectDB } from "./lib/db.js";
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5001;
 
 const __dirname = path.resolve();
 
+// 🔥 FIXED CORS — no trailing slash + multiple allowed domains
 app.use(
   cors({
-    origin: "https://faisal-real-time-chat-app.vercel.app/",
-    credentials: true, // allow frontend to send cookies
+    origin: [
+      "http://localhost:5173",
+      "https://faisal-real-time-chat-app.vercel.app"
+    ],
+    credentials: true,
   })
 );
 
 app.use(express.json());
 app.use(cookieParser());
 
+// API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/chat", chatRoutes);
 
+// Serve frontend in production
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
   app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+    res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
   });
 }
 
